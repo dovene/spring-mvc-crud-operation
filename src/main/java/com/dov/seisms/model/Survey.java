@@ -2,12 +2,20 @@ package com.dov.seisms.model;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Date;
 
+@Entity
 public class Survey {
+
+    @Id
     private String name;
     private String country;
     private int level;
+
+    @Column(name = "dateOfSurvey")
     private Date date;
 
     public Survey() {

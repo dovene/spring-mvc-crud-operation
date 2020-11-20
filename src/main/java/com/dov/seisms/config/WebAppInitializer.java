@@ -14,7 +14,7 @@ public class WebAppInitializer implements WebApplicationInitializer {
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
         AnnotationConfigWebApplicationContext dispatcherServlet = new AnnotationConfigWebApplicationContext(); // Conteneur Annotation
-        dispatcherServlet.register(MvcConfig.class);
+        dispatcherServlet.register(DBConfig.class, MvcConfig.class);
         servletContext.addListener(new ContextLoaderListener(dispatcherServlet));
         ServletRegistration.Dynamic dispatcher = servletContext.addServlet("dispatcher", new DispatcherServlet(dispatcherServlet));
         dispatcher.setLoadOnStartup(1);

@@ -2,6 +2,7 @@ package com.dov.seisms.controller;
 
 import com.dov.seisms.model.User;
 import com.dov.seisms.repository.SurveyRepository;
+import com.dov.seisms.repository.UserJpaRepository;
 import com.dov.seisms.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value={"/", "login"})
 public class LoginController {
     @Autowired
-    UserRepository userRepository;
+    UserJpaRepository userJpaRepository;
 
     @GetMapping
     public String login(Model model) {
@@ -29,13 +30,9 @@ public class LoginController {
 
     @PostMapping
     public String login(HttpSession session, @ModelAttribute User userParam) {
-     boolean isUserAllowed = userRepository.getFakeUsers().stream().filter(new Predicate<User>() {
-         @Override
-         public boolean test(User user) {
-             return user.areEqual(userParam);
-         }
-     }).collect(Collectors.toList()).size()>0;
-        if(isUserAllowed){
+        User user = userJpaRepository.findOne(userParam.getLogin());
+        boolean isUserAllowed = user != null && user.getPassword().equals(userParam.getPassword());
+        if (isUserAllowed) {
             session.setAttribute("user", userParam);
             return "redirect:/surveys";
         } else {

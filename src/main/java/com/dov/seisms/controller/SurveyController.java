@@ -2,6 +2,7 @@ package com.dov.seisms.controller;
 
 
 import com.dov.seisms.model.Survey;
+import com.dov.seisms.repository.SurveyJpaRepository;
 import com.dov.seisms.repository.SurveyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -21,14 +22,14 @@ import java.util.stream.Collectors;
 public class SurveyController {
 
     @Autowired
-    SurveyRepository surveyRepository;
+    SurveyJpaRepository surveyJpaRepository;
 
     @GetMapping
     public String list(HttpSession session, Model model) {
         if (session.getAttribute("user") == null) {
             return "redirect:/accessDenied";
         }
-        model.addAttribute("surveys", surveyRepository.getSurveys());
+        model.addAttribute("surveys", surveyJpaRepository.findAll());
         return "surveys";
     }
 
@@ -41,7 +42,7 @@ public class SurveyController {
 
     @PostMapping("/create")
     public String addSave(@ModelAttribute Survey survey) {
-        surveyRepository.getSurveys().add(survey);
+        surveyJpaRepository.save(survey);
         return "redirect:/surveys";
     }
 
@@ -49,20 +50,13 @@ public class SurveyController {
     @GetMapping
     @RequestMapping("/edit/{name}")
     public String edit(Model model, @PathVariable("name") String name) {
-        model.addAttribute("survey", surveyRepository.getSurveys().stream().filter(new Predicate<Survey>() {
-            @Override
-            public boolean test(Survey survey) {
-                return survey.getName().equals(name);
-            }
-        }).collect(Collectors.toList()).get(0));
+        model.addAttribute("survey", surveyJpaRepository.findOne(name));
         return "editSurvey";
     }
 
     @PostMapping("edit/{name}")
     public String editSave(@ModelAttribute Survey survey) {
-        Survey previousSurvey = surveyRepository.getSurveys().stream().filter(survey1 -> survey1.getName().equals(survey.getName())).collect(Collectors.toList()).get(0);
-        int previousSurveyIndex = surveyRepository.getSurveys().indexOf(previousSurvey);
-        surveyRepository.getSurveys().set(previousSurveyIndex, survey);
+        surveyJpaRepository.save(survey);
         return "redirect:/surveys";
     }
 
@@ -70,7 +64,7 @@ public class SurveyController {
     @GetMapping
     @RequestMapping("/delete")
     public String delete(Model model, @RequestParam("name") String name) {
-        surveyRepository.getSurveys().remove(surveyRepository.getSurveys().stream().filter(survey -> survey.getName().equals(name)).collect(Collectors.toList()).get(0));
+        surveyJpaRepository.delete(name);
         return "redirect:/surveys";
     }
 
